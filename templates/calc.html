@@ -18,7 +18,7 @@
    </script>
 
   <!-- moment.js is the JavaScript equivalent of arrow.py -->
-  <script 
+  <script
     src="{{ url_for('static', filename="js/moment.min.js") }}"></script>
 
 </head>
@@ -35,10 +35,10 @@
 
   <!--
   -- If there are any warnings or other messages from a prior
-  -- request to the server, 
-  -- they appear above the rest of the content, just until the next 
+  -- request to the server,
+  -- they appear above the rest of the content, just until the next
   -- action.  (This is only on request/response transactions that
-  -- result in regenerating the page, not on every xmlhttp request.) 
+  -- result in regenerating the page, not on every xmlhttp request.)
   -->
 
 {% with messages = get_flashed_messages() %}
@@ -50,6 +50,7 @@
     </ul>
   {% endif %}
 {% endwith %}
+<p class="message"></p>
 
 <!-- Design on bootstrap grid -->
 <form role="form">
@@ -77,7 +78,7 @@
        one.  We allocate it the full 12 columns of the bootstrap grid.
   -->
   <div class="row">
-  <div class="col-md-12"> 
+  <div class="col-md-12">
   <table class="control_time_table">
       <tr>
 	<th> Miles </th>
@@ -90,13 +91,13 @@
    {% for row in range(20) %}
     <tr class="control">
       <!-- Dist (mi) -->
-      <td><input name="miles" type="number" 
+      <td id="{{ row }}"><input name="miles" type="number"
            min="0" max="900" size="5" /></td>
       <!-- Dist (km) -->
-      <td><input name="km" type="text"
+      <td id="{{ row }}"><input name="km" type="number"
 	   min="0" max="1100" size="5" /> </td>
       <!-- Location (optional) -->
-      <td><input name="location" type="text" 
+      <td><input name="location" type="text"
         placeholder="Optional location name"
 	size="20" /> </td>
       <!-- Open time (read only, set by JavaScript function -->
@@ -116,18 +117,27 @@
 
   var SCRIPT_ROOT = {{ request.script_root|tojson|safe }} ;
   var TIME_CALC_URL = SCRIPT_ROOT + "/_calc_times";
+  //var km_dict = {};
 
   // Pass calctimes a <td> element containing the data for a control.
   // It extracts the distance and calls the server to get times to
   // fill in open and close times in a human-readable format.
   // (If we want to also keep the ISO-formatted times, we'll need to
-  // stash them in hidden fields.) 
+  // stash them in hidden fields.)
   function calc_times(control) {
     var km = control.find("input[name='km']").val();
+    //var id = control.find("input[name='km']").attr('id');
+    //km_dict[id] = km;
+    var begin_date = $("#begin_date").val();
+    var begin_time = $("#begin_time").val();
+    var begin_date = begin_date+"T"+begin_time+":00+00:00";
     var open_time_field = control.find("input[name='open']");
     var close_time_field = control.find("input[name='close']");
-    
-    $.getJSON(TIME_CALC_URL, { km: km }, 
+
+
+
+
+    $.getJSON(TIME_CALC_URL, { km: km, begin_date: begin_date},
       // response handler
       function(data) {
          var times = data.result;
@@ -139,10 +149,14 @@
      );// End of getJSON
     }
 
-  $(document).ready(function(){
+
+  //$(document).ready(function(){
+  //$("input[name='km']").keyup(function(event) {
+    //$("input[name='miles']").val("420");
+
    // Do the following when the page is finished loading
 
-      $('input[name="miles"]').change(
+      $('input[name="miles"]').keyup(
          function() {
              var miles = parseFloat($(this).val());
              var km = (1.609344 * miles).toFixed(1) ;
@@ -154,7 +168,7 @@
              calc_times(control_entry);
           });
 
-      $('input[name="km"]').change(
+      $('input[name="km"]').keyup(
          function() {
              var km = parseFloat($(this).val());
              var miles = (0.621371 * km).toFixed(1) ;
@@ -166,7 +180,9 @@
              calc_times(control_entry);
           });
 
-     });   // end of what we do on document ready
+
+   //});
+     //});   // end of what we do on document ready
 
 </script>
 

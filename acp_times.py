@@ -12,9 +12,8 @@ import arrow
 #  automated tests for grading.  You must keep
 #  these signatures even if you don't use all the
 #  same arguments.  Arguments are explained in the
-#  javadoc comments. 
+#  javadoc comments.
 #
-
 
 def open_time( control_dist_km, brevet_dist_km, brevet_start_time ):
     """
@@ -29,7 +28,36 @@ def open_time( control_dist_km, brevet_dist_km, brevet_start_time ):
        An ISO 8601 format date string indicating the control open time.
        This will be in the same time zone as the brevet start time.
     """
-    return arrow.now().isoformat()
+    start = arrow.get(brevet_start_time)
+    time_passed = 0
+    past_dist = 0
+    if(control_dist_km <= 1000 and control_dist_km > 600):
+        open_speed = 28 #kmph
+        temp_dist = control_dist_km - 600
+        past_dist += temp_dist
+        time_passed += (temp_dist / open_speed)
+    if(control_dist_km > 400):
+        open_speed = 30 #kmph
+        temp_dist = control_dist_km - past_dist - 400
+        past_dist += temp_dist
+        time_passed += (temp_dist / open_speed)
+    if(control_dist_km > 200):
+        open_speed = 32 #kmph
+        temp_dist = control_dist_km - past_dist - 200
+        past_dist += temp_dist
+        time_passed += (temp_dist / open_speed)
+    if(control_dist_km >= 0):
+        open_speed = 34 #kmph
+        temp_dist = control_dist_km - past_dist
+        time_passed += (temp_dist / open_speed)
+    UTC_error = 8 #added 5 hours to fix the UTC bug for our timezone
+    #time_passed += UTC_error
+    #time_passed = (control_dist_km / open_speed)# (km / 1) * (hrs / km)
+    hours = (time_passed // 1)
+    minutes = int(((time_passed - hours) * 60) // 1)
+    open_time = start.replace(hours=+(hours+UTC_error))
+    open_time = open_time.replace(minutes=+minutes)
+    return open_time.isoformat()
 
 def close_time( control_dist_km, brevet_dist_km, brevet_start_time ):
     """
@@ -44,6 +72,24 @@ def close_time( control_dist_km, brevet_dist_km, brevet_start_time ):
        An ISO 8601 format date string indicating the control close time.
        This will be in the same time zone as the brevet start time.
     """
-    return arrow.now().isoformat()
-
-
+    start = arrow.get(brevet_start_time)
+    time_passed = 0
+    past_dist = 0
+    if(control_dist_km <= 1000 and control_dist_km > 600):
+        open_speed = 11.428 #kmph
+        temp_dist = control_dist_km - 600
+        past_dist += temp_dist
+        time_passed += (temp_dist / open_speed)
+    if(control_dist_km > 0):
+        open_speed = 15 #kmph
+        temp_dist = control_dist_km - past_dist
+        past_dist += temp_dist
+        time_passed += (temp_dist / open_speed)
+    UTC_error = 8 #added 5 hours to fix the UTC bug for our timezone
+    #time_passed += UTC_error
+    #time_passed = (control_dist_km / open_speed)# (km / 1) * (hrs / km)
+    hours = (time_passed // 1)
+    minutes = int(((time_passed - hours) * 60) // 1)
+    close_time = start.replace(hours=+(hours+UTC_error))
+    close_time = close_time.replace(minutes=+minutes)
+    return close_time.isoformat()
