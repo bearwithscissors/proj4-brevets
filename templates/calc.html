@@ -95,7 +95,7 @@
            min="0" max="900" size="5" /></td>
       <!-- Dist (km) -->
       <td id="{{ row }}"><input name="km" type="number"
-	   min="0" max="1100" size="5" /> </td>
+	   min="0" max="1000" size="5" /> </td>
       <!-- Location (optional) -->
       <td><input name="location" type="text"
         placeholder="Optional location name"
@@ -126,13 +126,15 @@
   // stash them in hidden fields.)
   function calc_times(control) {
     var km = control.find("input[name='km']").val();
-    //var id = control.find("input[name='km']").attr('id');
-    //km_dict[id] = km;
+    if( km > 1000){
+      var km = 1000
+    }
     var begin_date = $("#begin_date").val();
     var begin_time = $("#begin_time").val();
     var begin_date = begin_date+"T"+begin_time+":00+00:00";
     var open_time_field = control.find("input[name='open']");
     var close_time_field = control.find("input[name='close']");
+
 
 
 
@@ -150,13 +152,8 @@
     }
 
 
-  //$(document).ready(function(){
-  //$("input[name='km']").keyup(function(event) {
-    //$("input[name='miles']").val("420");
-
-   // Do the following when the page is finished loading
-
       $('input[name="miles"]').keyup(
+
          function() {
              var miles = parseFloat($(this).val());
              var km = (1.609344 * miles).toFixed(1) ;
@@ -164,6 +161,12 @@
              var control_entry = $(this).parents(".control")
              var target = control_entry.find("input[name='km']");
              target.val( km );
+             //Set anything above max to be the max
+             if(miles > 621.4){
+               var fix_target = control_entry.find("input[name='miles']");
+               fix_target.val( 621.4 );
+               target.val( 1000 );
+             }
              // Then calculate times for this entry
              calc_times(control_entry);
           });
@@ -176,6 +179,12 @@
              var control_entry = $(this).parents(".control")
              var target = control_entry.find("input[name='miles']");
              target.val( miles );
+             //Set anything above the max to be the max
+             if(km > 1000){
+               var fix_target = control_entry.find("input[name='km']");
+               fix_target.val( 1000 );
+               target.val( 621.4 );
+             }
              // Then calculate times for this entry
              calc_times(control_entry);
           });

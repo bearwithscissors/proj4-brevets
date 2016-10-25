@@ -51,8 +51,6 @@ def open_time( control_dist_km, brevet_dist_km, brevet_start_time ):
         temp_dist = control_dist_km - past_dist
         time_passed += (temp_dist / open_speed)
     UTC_error = 8 #added 5 hours to fix the UTC bug for our timezone
-    #time_passed += UTC_error
-    #time_passed = (control_dist_km / open_speed)# (km / 1) * (hrs / km)
     hours = (time_passed // 1)
     minutes = int(((time_passed - hours) * 60) // 1)
     open_time = start.replace(hours=+(hours+UTC_error))
@@ -75,6 +73,7 @@ def close_time( control_dist_km, brevet_dist_km, brevet_start_time ):
     start = arrow.get(brevet_start_time)
     time_passed = 0
     past_dist = 0
+    UTC_error = 8 #added 8 hours to fix the UTC bug for our timezone
     if(control_dist_km <= 1000 and control_dist_km > 600):
         open_speed = 11.428 #kmph
         temp_dist = control_dist_km - 600
@@ -85,9 +84,9 @@ def close_time( control_dist_km, brevet_dist_km, brevet_start_time ):
         temp_dist = control_dist_km - past_dist
         past_dist += temp_dist
         time_passed += (temp_dist / open_speed)
-    UTC_error = 8 #added 5 hours to fix the UTC bug for our timezone
-    #time_passed += UTC_error
-    #time_passed = (control_dist_km / open_speed)# (km / 1) * (hrs / km)
+    if(control_dist_km == 0):
+        close_time = start.replace(hours=+(1+UTC_error))
+        return close_time.isoformat()
     hours = (time_passed // 1)
     minutes = int(((time_passed - hours) * 60) // 1)
     close_time = start.replace(hours=+(hours+UTC_error))
